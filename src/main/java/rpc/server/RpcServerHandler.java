@@ -3,8 +3,8 @@ package rpc.server;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import rpc.data.RpcRequest;
-import rpc.data.RpcResponse;
+import rpc.protocol.RpcRequest;
+import rpc.protocol.RpcResponse;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -69,6 +69,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
         response.setStatus(1);
         response.setDescription("Success");
         response.setValue(result);
+        response.setRequestId(msg.getRequestId());
 
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }

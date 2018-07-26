@@ -2,7 +2,7 @@ package rpc.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import rpc.data.RpcResponse;
+import rpc.protocol.RpcResponse;
 
 /**
  * class $classname
@@ -14,6 +14,7 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcResponse msg) {
         System.err.println("The result is: " + msg);
+        RpcResultCollector.getInstance().put(msg);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package rpc.server;
+package rpc.service;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

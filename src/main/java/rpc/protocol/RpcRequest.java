@@ -1,8 +1,7 @@
-package rpc.data;
-
-import rpc.util.JsonSerializationUtil;
+package rpc.protocol;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * class $classname
@@ -12,10 +11,29 @@ import java.util.Arrays;
  */
 
 public class RpcRequest {
+    private static AtomicInteger counter = new AtomicInteger(0);
+
     private String clzName;
     private String methodName;
     private Class<?>[] paramTypes;
     private Object[] params;
+    private Integer requestId;
+
+    private RpcRequest() {}
+
+    public static RpcRequest create() {
+        RpcRequest request = new RpcRequest();
+        request.requestId = counter.getAndIncrement();
+        return request;
+    }
+
+    public static AtomicInteger getCounter() {
+        return counter;
+    }
+
+    public static void setCounter(AtomicInteger counter) {
+        RpcRequest.counter = counter;
+    }
 
     public String getClzName() {
         return clzName;
@@ -49,6 +67,14 @@ public class RpcRequest {
         this.params = params;
     }
 
+    public Integer getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(Integer requestId) {
+        this.requestId = requestId;
+    }
+
     @Override
     public String toString() {
         return "RpcRequest{" +
@@ -56,17 +82,7 @@ public class RpcRequest {
             ", methodName='" + methodName + '\'' +
             ", paramTypes=" + Arrays.toString(paramTypes) +
             ", params=" + Arrays.toString(params) +
+            ", requestId=" + requestId +
             '}';
-    }
-
-    public static void main(String[] args) {
-        RpcRequest req = new RpcRequest();
-        req.setClzName("Test");
-        req.setMethodName("test");
-        req.setParams(new Object[] {1, 2});
-        req.setParamTypes(new Class<?>[] {Integer.class, Integer.class});
-
-        RpcRequest afterReq = JsonSerializationUtil.fromBytes(JsonSerializationUtil.toBytes(req), RpcRequest.class);
-        System.out.println(afterReq);
     }
 }

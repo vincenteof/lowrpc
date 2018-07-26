@@ -3,8 +3,8 @@ package rpc.client;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import rpc.data.RpcDecoder;
-import rpc.data.RpcEncoder;
+import rpc.protocol.RpcDecoder;
+import rpc.protocol.RpcEncoder;
 
 /**
  * class $classname
