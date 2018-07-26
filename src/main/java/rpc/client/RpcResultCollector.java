@@ -34,6 +34,6 @@ public class RpcResultCollector {
     }
 
     public boolean contains(Integer requestId) {
-        return results.contains(requestId);
+        return results.containsKey(requestId);
     }
 }

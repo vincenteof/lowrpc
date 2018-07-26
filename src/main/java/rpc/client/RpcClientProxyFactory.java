@@ -3,6 +3,7 @@ package rpc.client;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -26,29 +27,29 @@ public class RpcClientProxyFactory {
     private RpcClientProxyFactory() {}
 
     @SuppressWarnings("unchecked")
-    public static <T> T createProxy(Class<T> rpcItf) throws InterruptedException {
+    public static <T> T createProxy(Class<T> rpcItf) {
         LowRpcClient annotation = rpcItf.getDeclaredAnnotation(LowRpcClient.class);
-
-        EventLoopGroup group = new NioEventLoopGroup();
-        Bootstrap b = new Bootstrap();
-        b.group(group)
-            .channel(NioSocketChannel.class)
-            .handler(new RpcClientInitializer());
-        Channel ch = b.connect(annotation.host(), annotation.port()).sync().channel();
+        InvocationHandler handler = new RpcClientInvocationHandler(
+            annotation.host(),
+            annotation.port(),
+            annotation.clzName()
+        );
 
         return (T) Proxy.newProxyInstance(
             Thread.currentThread().getContextClassLoader(),
             new Class[] {rpcItf},
-            new RpcClientInvocationHandler(ch, annotation.clzName())
+            handler
         );
     }
 
     private static class RpcClientInvocationHandler implements InvocationHandler {
-        private Channel channel;
+        private String host;
+        private int port;
         private String clzName;
 
-        RpcClientInvocationHandler(Channel channel, String clzName) {
-            this.channel = channel;
+        RpcClientInvocationHandler(String host, int port, String clzName) {
+            this.host = host;
+            this.port = port;
             this.clzName = clzName;
         }
 
@@ -62,14 +63,29 @@ public class RpcClientProxyFactory {
             request.setParamTypes(paramTypes.length == 0 ? null : paramTypes);
             request.setParams(args);
 
-            channel.writeAndFlush(request).sync();
-
+            EventLoopGroup group = new NioEventLoopGroup();
             RpcResultCollector collector = RpcResultCollector.getInstance();
-            Integer requestId = request.getRequestId();
-            while (!collector.contains(requestId)) {
-                Thread.sleep(100);
+            try {
+                Bootstrap b = new Bootstrap();
+                b.group(group)
+                    .channel(NioSocketChannel.class)
+                    .handler(new RpcClientInitializer());
+                Channel channel = b.connect(host, port).sync().channel();
+                channel.writeAndFlush(request).sync();
+
+
+                Integer requestId = request.getRequestId();
+                System.err.println(request);
+                while (!collector.contains(requestId)) {
+                    Thread.sleep(100);
+                }
+
+                channel.closeFuture().sync();
+            } finally {
+                group.shutdownGracefully();
             }
-            RpcResponse response = collector.get(requestId);
+
+            RpcResponse response = collector.get(request.getRequestId());
 
             if (response.getStatus() == 0) {
                 throw new RuntimeException("Rpc call failed for: " + response.getDescription());
