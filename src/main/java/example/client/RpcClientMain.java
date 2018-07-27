@@ -12,8 +12,8 @@ public class RpcClientMain {
     public static void main(String[] args) {
         TestServiceClient client = RpcClientProxyFactory.createProxy(TestServiceClient.class);
         System.out.println(client.testPureWithoutParams());
-        System.out.println(client.testStateWithoutParams());
-        System.out.println(client.testStateWithoutParams());
-        System.out.println(client.testStateWithParams(2));
+        //System.out.println(client.testStateWithoutParams());
+        //System.out.println(client.testStateWithoutParams());
+        //System.out.println(client.testStateWithParams(2));
     }
 }

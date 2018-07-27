@@ -14,7 +14,7 @@ import rpc.protocol.RpcEncoder;
  */
 public class RpcClientInitializer extends ChannelInitializer<SocketChannel> {
     @Override
-    protected void initChannel(SocketChannel ch) throws Exception {
+    protected void initChannel(SocketChannel ch) {
         ChannelPipeline pipeline = ch.pipeline();
 
         pipeline.addLast(new RpcDecoder());

@@ -26,7 +26,6 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcRequest msg) {
-
         String clzName = msg.getClzName();
         if (clzName == null || clzName.isEmpty()) {
             throw new IllegalArgumentException("Invalid class name: " + clzName);

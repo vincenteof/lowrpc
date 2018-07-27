@@ -65,7 +65,6 @@ public class RpcClientProxyFactory {
 
             EventLoopGroup group = new NioEventLoopGroup();
             RpcResultCollector collector = RpcResultCollector.getInstance();
-            RpcResponse response = null;
             try {
                 Bootstrap b = new Bootstrap();
                 b.group(group)
@@ -74,13 +73,13 @@ public class RpcClientProxyFactory {
                 Channel channel = b.connect(host, port).sync().channel();
                 channel.writeAndFlush(request).sync();
 
+                LOG.info("Request received in dynamic proxy: {}", request);
 
                 Integer requestId = request.getRequestId();
-
-                System.err.println(request);
-                LOG.info("Request received in dynamic proxy: {}", request);
+                RpcResponse response;
                 while ((response = collector.getIfPresent(requestId)) == null) {
                     Thread.sleep(100);
+                    LOG.info("Wait for response for 100ms");
                 }
 
                 channel.closeFuture().sync();
