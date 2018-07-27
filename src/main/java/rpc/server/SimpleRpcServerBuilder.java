@@ -6,12 +6,17 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import org.apache.commons.configuration2.Configuration;
+import rpc.srsd.ServiceRegistrationInfo;
+import rpc.srsd.ServiceRegistry;
+import rpc.util.ConfigurationUtil;
 import rpc.util.ReflectionUtil;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -23,11 +28,14 @@ import java.util.Map;
 public class SimpleRpcServerBuilder {
     private int port;
     private String beansPackName;
+    private ServiceRegistry registry;
 
     private SimpleRpcServerBuilder() {}
 
-    public static SimpleRpcServerBuilder builder() {
-        return new SimpleRpcServerBuilder();
+    public static SimpleRpcServerBuilder builder(ServiceRegistry registry) {
+        SimpleRpcServerBuilder result = new SimpleRpcServerBuilder();
+        result.registry = registry;
+        return result;
     }
 
     public SimpleRpcServerBuilder port(int port) {
@@ -55,19 +63,33 @@ public class SimpleRpcServerBuilder {
             EventLoopGroup workerGroup = new NioEventLoopGroup();
 
             Map<String, Object> beans = new HashMap<>();
-            ReflectionUtil.getClzFromPack(beansPackName).forEach(clz -> {
-                Object bean;
-                try {
-                    Constructor c = clz.getDeclaredConstructor();
-                    bean = c.newInstance();
-                    beans.put(clz.getName(), bean);
-                } catch (NoSuchMethodException |
+            ReflectionUtil.getClzFromPack(beansPackName).stream()
+                .filter(clz -> clz.getDeclaredAnnotation(LowRpcService.class) != null)
+                .forEach(clz -> {
+                    Object bean;
+                    LowRpcService service = clz.getDeclaredAnnotation(LowRpcService.class);
+                    try {
+                        Constructor c = clz.getDeclaredConstructor();
+                        bean = c.newInstance();
+                        beans.put(service.name(), bean);
+                    } catch (NoSuchMethodException |
                         IllegalAccessException |
                         InvocationTargetException |
                         InstantiationException e) {
-                    e.printStackTrace();
-                }
-            });
+                        e.printStackTrace();
+                    }
+                    // id在注册时如何生成???
+                    Configuration config = ConfigurationUtil.getPropConfig("common");
+                    String address = Optional.ofNullable(config.getString("rpc.server.address"))
+                        .orElseThrow(() -> new IllegalStateException("`rpc.server.address` is not configured"));
+                    int port = config.getInt("rpc.server.port");
+
+                    ServiceRegistrationInfo regInfo = new ServiceRegistrationInfo();
+                    regInfo.setName(service.name());
+                    regInfo.setAddress(address);
+                    regInfo.setPort(port);
+                    registry.register(regInfo);
+                });
 
             try {
                 ServerBootstrap b = new ServerBootstrap();

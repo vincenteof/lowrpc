@@ -27,7 +27,7 @@ public class ConsulServiceRegistry implements ServiceRegistry {
     }
 
     @Override
-    public void register(ServiceRegistrationInfo serviceRegistrationInfo) {
+    public void register(ServiceRegistrationInfo regInfo) {
         AgentClient agentClient = ConsulObject.consul().agentClient();
 
         ImmutableRegCheck check =  ImmutableRegCheck.builder()
@@ -37,10 +37,10 @@ public class ConsulServiceRegistry implements ServiceRegistry {
             .build();
 
         ImmutableRegistration registration = ImmutableRegistration.builder()
-            .id(serviceRegistrationInfo.getId())
-            .name(serviceRegistrationInfo.getName())
-            .address(serviceRegistrationInfo.getAddress())
-            .port(serviceRegistrationInfo.getPort())
+            .id(regInfo.getId() == null ? regInfo.getName() : regInfo.getId())
+            .name(regInfo.getName())
+            .address(regInfo.getAddress())
+            .port(regInfo.getPort())
             .addChecks(check)
             .build();
 

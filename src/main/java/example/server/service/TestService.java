@@ -1,5 +1,7 @@
 package example.server.service;
 
+import rpc.server.LowRpcService;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -8,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Yingpeng.Chen
  * @date 2018/7/27, 10:22
  */
+@LowRpcService(name = "testService")
 public class TestService {
     private AtomicInteger counter = new AtomicInteger(0);
 

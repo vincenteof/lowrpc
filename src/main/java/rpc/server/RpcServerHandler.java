@@ -26,9 +26,9 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcRequest msg) {
-        String clzName = msg.getClzName();
-        if (clzName == null || clzName.isEmpty()) {
-            throw new IllegalArgumentException("Invalid class name: " + clzName);
+        String serviceName = msg.getServiceName();
+        if (serviceName == null || serviceName.isEmpty()) {
+            throw new IllegalArgumentException("Invalid service name: " + serviceName);
         }
 
         String methodName = msg.getMethodName();
@@ -46,9 +46,9 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
             throw new IllegalArgumentException("Parameters is not compatible with parameter types");
         }
 
-        Object bean = beans.get(clzName);
+        Object bean = beans.get(serviceName);
         if (Objects.isNull(bean)) {
-            throw new IllegalArgumentException("class `" + clzName + "` does not exists");
+            throw new IllegalArgumentException("Service `" + serviceName + "` does not exists");
         }
 
         Object result;
@@ -58,7 +58,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
             throw new IllegalArgumentException(
-                "class `" + clzName + "` does not have method which matches that signature");
+                "class `" + serviceName + "` does not have method which matches that signature");
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             throw new IllegalArgumentException("Method invocation error");

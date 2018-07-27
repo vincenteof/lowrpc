@@ -9,10 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rpc.protocol.RpcRequest;
 import rpc.protocol.RpcResponse;
+import rpc.srsd.ServiceDiscovery;
+import rpc.srsd.ServiceRegistrationInfo;
+import rpc.util.MathUtil;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.List;
 
 /**
  * class $classname
@@ -27,13 +31,9 @@ public class RpcClientProxyFactory {
     private RpcClientProxyFactory() {}
 
     @SuppressWarnings("unchecked")
-    public static <T> T createProxy(Class<T> rpcItf) {
+    public static <T> T createProxy(Class<T> rpcItf, ServiceDiscovery discovery) {
         LowRpcClient annotation = rpcItf.getDeclaredAnnotation(LowRpcClient.class);
-        InvocationHandler handler = new RpcClientInvocationHandler(
-            annotation.host(),
-            annotation.port(),
-            annotation.clzName()
-        );
+        InvocationHandler handler = new RpcClientInvocationHandler(annotation.serviceName(), discovery);
 
         return (T) Proxy.newProxyInstance(
             Thread.currentThread().getContextClassLoader(),
@@ -43,25 +43,27 @@ public class RpcClientProxyFactory {
     }
 
     private static class RpcClientInvocationHandler implements InvocationHandler {
-        private String host;
-        private int port;
-        private String clzName;
+        private String serviceName;
+        private ServiceDiscovery discovery;
 
-        RpcClientInvocationHandler(String host, int port, String clzName) {
-            this.host = host;
-            this.port = port;
-            this.clzName = clzName;
+        RpcClientInvocationHandler(String serviceName, ServiceDiscovery discovery) {
+            this.serviceName = serviceName;
+            this.discovery = discovery;
         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             RpcRequest request = RpcRequest.create();
 
-            request.setClzName(clzName);
+            request.setServiceName(serviceName);
             request.setMethodName(method.getName());
             Class<?>[] paramTypes = method.getParameterTypes();
             request.setParamTypes(paramTypes.length == 0 ? null : paramTypes);
             request.setParams(args);
+
+            List<ServiceRegistrationInfo> regList =  discovery.getAvailableServices(serviceName);
+            ServiceRegistrationInfo reg = regList.get(MathUtil.randomIntInRange(0, regList.size()));
+            LOG.info("Select service registration is: {}", reg);
 
             EventLoopGroup group = new NioEventLoopGroup();
             RpcResultCollector collector = RpcResultCollector.getInstance();
@@ -70,7 +72,7 @@ public class RpcClientProxyFactory {
                 b.group(group)
                     .channel(NioSocketChannel.class)
                     .handler(new RpcClientInitializer());
-                Channel channel = b.connect(host, port).sync().channel();
+                Channel channel = b.connect(reg.getAddress(), reg.getPort()).sync().channel();
                 channel.writeAndFlush(request).sync();
 
                 LOG.info("Request received in dynamic proxy: {}", request);

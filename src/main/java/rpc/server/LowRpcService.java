@@ -1,4 +1,4 @@
-package rpc.client;
+package rpc.server;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,12 +9,10 @@ import java.lang.annotation.Target;
  * class $classname
  *
  * @author Yingpeng.Chen
- * @date 2018/7/26, 14:45
+ * @date 2018/7/27, 16:16
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LowRpcClient {
-//    String host() default "";
-//    int port() default 0;
-    String serviceName();
+public @interface LowRpcService {
+    String name();
 }

@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RpcRequest {
     private static AtomicInteger counter = new AtomicInteger(0);
 
-    private String clzName;
+    private String serviceName;
     private String methodName;
     private Class<?>[] paramTypes;
     private Object[] params;
@@ -27,20 +27,12 @@ public class RpcRequest {
         return request;
     }
 
-    public static AtomicInteger getCounter() {
-        return counter;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public static void setCounter(AtomicInteger counter) {
-        RpcRequest.counter = counter;
-    }
-
-    public String getClzName() {
-        return clzName;
-    }
-
-    public void setClzName(String clzName) {
-        this.clzName = clzName;
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     public String getMethodName() {
@@ -78,7 +70,7 @@ public class RpcRequest {
     @Override
     public String toString() {
         return "RpcRequest{" +
-            "clzName='" + clzName + '\'' +
+            "serviceName='" + serviceName + '\'' +
             ", methodName='" + methodName + '\'' +
             ", paramTypes=" + Arrays.toString(paramTypes) +
             ", params=" + Arrays.toString(params) +
