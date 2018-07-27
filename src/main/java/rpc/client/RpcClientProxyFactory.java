@@ -1,15 +1,14 @@
 package rpc.client;
 
-import com.alibaba.fastjson.JSONObject;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rpc.protocol.RpcRequest;
 import rpc.protocol.RpcResponse;
-import rpc.service.TestService;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -22,8 +21,9 @@ import java.lang.reflect.Proxy;
  * @date 2018/7/26, 15:00
  */
 
-// shutdown and clean resources !!!
 public class RpcClientProxyFactory {
+    private static final Logger LOG = LoggerFactory.getLogger(RpcClientProxyFactory.class);
+
     private RpcClientProxyFactory() {}
 
     @SuppressWarnings("unchecked")
@@ -65,6 +65,7 @@ public class RpcClientProxyFactory {
 
             EventLoopGroup group = new NioEventLoopGroup();
             RpcResultCollector collector = RpcResultCollector.getInstance();
+            RpcResponse response = null;
             try {
                 Bootstrap b = new Bootstrap();
                 b.group(group)
@@ -75,35 +76,22 @@ public class RpcClientProxyFactory {
 
 
                 Integer requestId = request.getRequestId();
+
                 System.err.println(request);
-                while (!collector.contains(requestId)) {
+                LOG.info("Request received in dynamic proxy: {}", request);
+                while ((response = collector.getIfPresent(requestId)) == null) {
                     Thread.sleep(100);
                 }
 
                 channel.closeFuture().sync();
+                if (response.getStatus() == 0) {
+                    throw new RuntimeException("Rpc call failed for: " + response.getDescription());
+                }
+
+                return response.getValue();
             } finally {
                 group.shutdownGracefully();
             }
-
-            RpcResponse response = collector.get(request.getRequestId());
-
-            if (response.getStatus() == 0) {
-                throw new RuntimeException("Rpc call failed for: " + response.getDescription());
-            }
-
-            return response.getValue();
         }
-    }
-
-    public static void main(String[] args) throws NoSuchMethodException {
-        Class<TestService> clz = TestService.class;
-        Method method = clz.getMethod("testStateWithParams", Integer.class);
-        System.out.println(method.getDeclaringClass().getName());
-        System.out.println(method.getName());
-        for (Class c: method.getParameterTypes()) {
-            System.out.println(c);
-        }
-        System.out.println(TestServiceClient.class.getDeclaredAnnotation(LowRpcClient.class).host());
-        System.out.println(JSONObject.toJSONString(RpcRequest.create()));
     }
 }

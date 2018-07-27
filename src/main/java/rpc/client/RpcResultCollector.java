@@ -1,8 +1,10 @@
 package rpc.client;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import rpc.protocol.RpcResponse;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * class $classname
@@ -12,7 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RpcResultCollector {
     private static RpcResultCollector instance;
-    private ConcurrentHashMap<Integer, RpcResponse> results = new ConcurrentHashMap<>();
+    private Cache<Integer, RpcResponse> results = CacheBuilder.newBuilder()
+        .maximumSize(1000)
+        .expireAfterAccess(60, TimeUnit.SECONDS)
+        .build();
 
     private RpcResultCollector() {}
 
@@ -25,15 +30,15 @@ public class RpcResultCollector {
         return instance;
     }
 
-    public RpcResponse get(Integer requestId) {
-        return results.get(requestId);
+    public RpcResponse getIfPresent(Integer requestId) {
+        return results.getIfPresent(requestId);
     }
 
-    public RpcResponse put(RpcResponse response) {
-        return results.put(response.getRequestId(), response);
+    public void put(Integer requestId, RpcResponse response) {
+        if (requestId == null) {
+            throw new IllegalArgumentException("RequestId is `null`");
+        }
+        results.put(requestId, response);
     }
 
-    public boolean contains(Integer requestId) {
-        return results.containsKey(requestId);
-    }
 }

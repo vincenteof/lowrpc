@@ -2,6 +2,8 @@ package rpc.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rpc.protocol.RpcResponse;
 
 /**
@@ -11,10 +13,12 @@ import rpc.protocol.RpcResponse;
  * @date 2018/7/25, 15:26
  */
 public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
+    private static final Logger LOG = LoggerFactory.getLogger(RpcClientHandler.class);
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcResponse msg) {
-        System.err.println("The result is: " + msg);
-        RpcResultCollector.getInstance().put(msg);
+        LOG.info("The result is: {}", msg);
+        RpcResultCollector.getInstance().put(msg.getRequestId(), msg);
     }
 
     @Override

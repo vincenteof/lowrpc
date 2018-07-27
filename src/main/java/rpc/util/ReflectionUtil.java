@@ -73,8 +73,4 @@ public class ReflectionUtil {
             throw new IllegalStateException("Path `" + cur + "` is neither a file nor a package");
         }
     }
-
-    public static void main(String[] args) throws IOException {
-        getClzFromPack("rpc.protocol").forEach(System.out::println);
-    }
 }

@@ -1,4 +1,4 @@
-package rpc.service;
+package example.server.service;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -6,13 +6,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * class $classname
  *
  * @author Yingpeng.Chen
- * @date 2018/7/25, 15:20
+ * @date 2018/7/27, 10:22
  */
 public class TestService {
     private AtomicInteger counter = new AtomicInteger(0);
 
     public String testPureWithoutParams() {
-        return "Test Ok";
+        return "Hello";
     }
 
     public Integer testStateWithoutParams() {

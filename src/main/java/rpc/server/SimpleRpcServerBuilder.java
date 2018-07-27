@@ -83,9 +83,4 @@ public class SimpleRpcServerBuilder {
             }
         }
     }
-
-    public static void main(String[] args) {
-        Class<Integer> c = Integer.class;
-        System.out.println(c.getName());
-    }
 }
