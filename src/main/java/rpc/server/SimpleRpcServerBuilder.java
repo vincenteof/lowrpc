@@ -10,6 +10,7 @@ import org.apache.commons.configuration2.Configuration;
 import rpc.srsd.ServiceRegistrationInfo;
 import rpc.srsd.ServiceRegistry;
 import rpc.util.ConfigurationUtil;
+import rpc.util.Constant;
 import rpc.util.ReflectionUtil;
 
 import java.lang.reflect.Constructor;
@@ -78,11 +79,13 @@ public class SimpleRpcServerBuilder {
                         InstantiationException e) {
                         e.printStackTrace();
                     }
-                    // id在注册时如何生成???
-                    Configuration config = ConfigurationUtil.getPropConfig("common");
-                    String address = Optional.ofNullable(config.getString("rpc.server.address"))
+                    // id在注册时如何生成 ???
+                    // 如何解决重名问题 ???
+                    Configuration config = ConfigurationUtil.getPropConfig(Constant.RPC_SERVER_CONFIG);
+                    String addr = config.getString(Constant.RPC_SERVER_ADDRESS);
+                    String address = Optional.ofNullable(addr)
                         .orElseThrow(() -> new IllegalStateException("`rpc.server.address` is not configured"));
-                    int port = config.getInt("rpc.server.port");
+                    int port = config.getInt(Constant.RPC_SERVER_PORT);
 
                     ServiceRegistrationInfo regInfo = new ServiceRegistrationInfo();
                     regInfo.setName(service.name());

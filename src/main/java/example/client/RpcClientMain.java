@@ -16,8 +16,8 @@ public class RpcClientMain {
             ConsulServiceDiscovery.getInstance()
         );
         System.out.println(client.testPureWithoutParams());
-        //System.out.println(client.testStateWithoutParams());
-        //System.out.println(client.testStateWithoutParams());
-        //System.out.println(client.testStateWithParams(2));
+        System.out.println(client.testStateWithoutParams());
+        System.out.println(client.testStateWithoutParams());
+        System.out.println(client.testStateWithParams(2));
     }
 }
