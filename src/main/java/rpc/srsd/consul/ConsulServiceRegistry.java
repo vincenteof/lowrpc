@@ -3,8 +3,13 @@ package rpc.srsd.consul;
 import com.orbitz.consul.AgentClient;
 import com.orbitz.consul.model.agent.ImmutableRegCheck;
 import com.orbitz.consul.model.agent.ImmutableRegistration;
+import org.apache.commons.configuration2.Configuration;
 import rpc.srsd.ServiceRegistrationInfo;
 import rpc.srsd.ServiceRegistry;
+import rpc.util.ConfigurationUtil;
+import rpc.util.Constant;
+
+import java.util.Objects;
 
 /**
  * class $classname
@@ -30,8 +35,13 @@ public class ConsulServiceRegistry implements ServiceRegistry {
     public void register(ServiceRegistrationInfo regInfo) {
         AgentClient agentClient = ConsulObject.consul().agentClient();
 
+        Configuration conf = ConfigurationUtil.getPropConfig(Constant.RPC_SERVER_CONFIG);
+        String address = conf.getString(Constant.RPC_SERVER_ADDRESS);
+        Objects.requireNonNull(address);
+        String addressWithPort = String.format("%s:22", address);
+
         ImmutableRegCheck check =  ImmutableRegCheck.builder()
-            .tcp("127.0.0.1:22")
+            .tcp(addressWithPort)
             .interval("10s")
             .timeout("15s")
             .build();

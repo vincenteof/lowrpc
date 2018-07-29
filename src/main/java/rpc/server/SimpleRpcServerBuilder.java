@@ -7,6 +7,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.apache.commons.configuration2.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rpc.srsd.ServiceRegistrationInfo;
 import rpc.srsd.ServiceRegistry;
 import rpc.util.ConfigurationUtil;
@@ -17,6 +19,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -27,6 +30,8 @@ import java.util.Optional;
  * @date 2018/7/26, 13:40
  */
 public class SimpleRpcServerBuilder {
+    private static final Logger LOG = LoggerFactory.getLogger(SimpleRpcServerBuilder.class);
+
     private int port;
     private String beansPackName;
     private ServiceRegistry registry;
@@ -79,18 +84,24 @@ public class SimpleRpcServerBuilder {
                         InstantiationException e) {
                         e.printStackTrace();
                     }
+
                     // id在注册时如何生成 ???
-                    // 如何解决重名问题 ???
                     Configuration config = ConfigurationUtil.getPropConfig(Constant.RPC_SERVER_CONFIG);
-                    String addr = config.getString(Constant.RPC_SERVER_ADDRESS);
-                    String address = Optional.ofNullable(addr)
-                        .orElseThrow(() -> new IllegalStateException("`rpc.server.address` is not configured"));
-                    int port = config.getInt(Constant.RPC_SERVER_PORT);
+                    String address = config.getString(Constant.RPC_SERVER_ADDRESS);
+                    String port = config.getString(Constant.RPC_SERVER_PORT);
+                    Objects.requireNonNull(address);
+                    Objects.requireNonNull(port);
+                    String id = service.name() + "-" + address.replaceAll("\\.", "-");
+
 
                     ServiceRegistrationInfo regInfo = new ServiceRegistrationInfo();
                     regInfo.setName(service.name());
                     regInfo.setAddress(address);
-                    regInfo.setPort(port);
+                    regInfo.setPort(Integer.parseInt(port));
+                    regInfo.setId(id);
+
+                    LOG.info("Registration: {}", regInfo);
+
                     registry.register(regInfo);
                 });
 

@@ -7,6 +7,8 @@ import org.apache.commons.configuration2.Configuration;
 import rpc.util.ConfigurationUtil;
 import rpc.util.Constant;
 
+import java.util.Objects;
+
 
 /**
  * class $classname
@@ -25,6 +27,8 @@ public class ConsulObject {
                 Configuration config = ConfigurationUtil.getPropConfig(Constant.RPC_CLIENT_CONFIG);
                 String address = config.getString(Constant.SERVICE_DISCOVERY_ADDRESS);
                 String port = config.getString(Constant.SERVICE_DISCOVERY_PORT);
+                Objects.requireNonNull(address);
+                Objects.requireNonNull(port);
                 consul = Consul.builder().withHostAndPort(HostAndPort.fromString(address + ":" + port)).build();
             }
             return consul;

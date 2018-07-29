@@ -17,7 +17,6 @@ public class RpcClientMain {
         );
         System.out.println(client.testPureWithoutParams());
         System.out.println(client.testStateWithoutParams());
-        System.out.println(client.testStateWithoutParams());
         System.out.println(client.testStateWithParams(2));
     }
 }
