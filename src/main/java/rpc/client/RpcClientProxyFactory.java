@@ -80,6 +80,7 @@ public class RpcClientProxyFactory {
                 Integer requestId = request.getRequestId();
                 RpcResponse response;
                 while ((response = collector.getIfPresent(requestId)) == null) {
+                    // 超时机制
                     Thread.sleep(100);
                     LOG.info("Wait for response for 100ms");
                 }
