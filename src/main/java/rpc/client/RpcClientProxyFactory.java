@@ -5,12 +5,15 @@ import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.apache.commons.configuration2.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rpc.protocol.RpcRequest;
 import rpc.protocol.RpcResponse;
 import rpc.srsd.ServiceDiscovery;
 import rpc.srsd.ServiceRegistrationInfo;
+import rpc.util.ConfigurationUtil;
+import rpc.util.Constant;
 import rpc.util.MathUtil;
 
 import java.lang.reflect.InvocationHandler;
@@ -65,8 +68,12 @@ public class RpcClientProxyFactory {
             ServiceRegistrationInfo reg = regList.get(MathUtil.randomIntInRange(0, regList.size()));
             LOG.info("Select service registration is: {}", reg);
 
+            Configuration conf = ConfigurationUtil.getPropConfig(Constant.RPC_CLIENT_CONFIG);
+            long timeOut = conf.getLong(Constant.RPC_CLIENT_TIMEOUT);
+
             EventLoopGroup group = new NioEventLoopGroup();
             RpcResultCollector collector = RpcResultCollector.getInstance();
+            long timeAcc = 0;
             try {
                 Bootstrap b = new Bootstrap();
                 b.group(group)
@@ -79,13 +86,18 @@ public class RpcClientProxyFactory {
 
                 Integer requestId = request.getRequestId();
                 RpcResponse response;
-                while ((response = collector.getIfPresent(requestId)) == null) {
-                    // 超时机制
+
+                while ((response = collector.getIfPresent(requestId)) == null && timeAcc < timeOut) {
                     Thread.sleep(100);
                     LOG.info("Wait for response for 100ms");
+                    timeAcc += 100;
+                }
+                channel.closeFuture().sync();
+
+                if (response == null) {
+                    throw new RuntimeException("Client timeout");
                 }
 
-                channel.closeFuture().sync();
                 if (response.getStatus() == 0) {
                     throw new RuntimeException("Rpc call failed for: " + response.getDescription());
                 }

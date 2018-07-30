@@ -8,4 +8,5 @@ public class Constant {
     public static final String RPC_CLIENT_CONFIG                = "rpc-client-config.properties";
     public static final String SERVICE_DISCOVERY_ADDRESS        = "service.discovery.address";
     public static final String SERVICE_DISCOVERY_PORT           = "service.discovery.port";
+    public static final String RPC_CLIENT_TIMEOUT               = "rpc.client.timeout";
 }
