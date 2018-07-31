@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 
 /**
@@ -29,6 +28,7 @@ import java.util.Optional;
  * @author Yingpeng.Chen
  * @date 2018/7/26, 13:40
  */
+// seems has some problems, it has no default value for port and beansPackName
 public class SimpleRpcServerBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleRpcServerBuilder.class);
 
@@ -79,20 +79,20 @@ public class SimpleRpcServerBuilder {
                         bean = c.newInstance();
                         beans.put(service.name(), bean);
                     } catch (NoSuchMethodException |
-                        IllegalAccessException |
-                        InvocationTargetException |
-                        InstantiationException e) {
+                            IllegalAccessException |
+                            InvocationTargetException |
+                            InstantiationException e) {
                         e.printStackTrace();
+                        return;
                     }
 
-                    // id在注册时如何生成 ???
                     Configuration config = ConfigurationUtil.getPropConfig(Constant.RPC_SERVER_CONFIG);
                     String address = config.getString(Constant.RPC_SERVER_ADDRESS);
                     String port = config.getString(Constant.RPC_SERVER_PORT);
                     Objects.requireNonNull(address);
                     Objects.requireNonNull(port);
+                    // id is something like `testService-192-168-115-22`
                     String id = service.name() + "-" + address.replaceAll("\\.", "-");
-
 
                     ServiceRegistrationInfo regInfo = new ServiceRegistrationInfo();
                     regInfo.setName(service.name());
