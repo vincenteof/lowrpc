@@ -3,6 +3,8 @@ package rpc.inject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import rpc.inject.testservice.ServiceA;
+import rpc.inject.testservice.ServiceB;
 
 import java.util.Map;
 
@@ -24,5 +26,9 @@ public class BeanHouseTest {
     void getServiceBeansTest() {
         Map<String, Object> beans = beanHouse.getServiceBeans();
         Assertions.assertEquals(2, beans.size());
+        ServiceA serviceA = (ServiceA) beans.get("serviceA");
+        ServiceB serviceB = (ServiceB) beans.get("serviceB");
+        Assertions.assertEquals("A", serviceA.f());
+        Assertions.assertEquals("CompA", serviceB.g());
     }
 }

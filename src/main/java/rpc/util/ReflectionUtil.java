@@ -1,6 +1,8 @@
 package rpc.util;
 
 import com.google.common.collect.ImmutableList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -10,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static rpc.util.Constant.*;
+
 /**
  * class $classname
  *
@@ -17,11 +21,9 @@ import java.util.List;
  * @date 2018/7/26, 9:25
  */
 
+// refactor it to fix bug in junit test
 public class ReflectionUtil {
-    private static final String DOT = ".";
-    private static final String SLASH = "/";
-    private static final String EMPTY = "";
-    private static final String CLASS_SUFFIX = ".class";
+    private static Logger LOG = LoggerFactory.getLogger(ReflectionUtil.class);
 
     public static List<Class<?>> getClzFromPack(String packageName) {
         String uriStr = ClassLoader.getSystemResource(EMPTY).toString() + packageName.replace(DOT, SLASH);
@@ -65,7 +67,8 @@ public class ReflectionUtil {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error("Error in `ReflectionUtil`: {}", e);
+                throw new IllegalStateException(e);
             }
 
             return acc;
