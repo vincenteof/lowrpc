@@ -4,6 +4,8 @@ import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2018/7/27, 16:36
  */
 public class ConfigurationUtil {
+    private static Logger LOG = LoggerFactory.getLogger(ConfigurationUtil.class);
+
     private static final Configurations configs = new Configurations();
     private static final ConcurrentHashMap<String, Object> configMap = new ConcurrentHashMap<>();
     private static final String CLZ_ROOT_PATH = Configuration.class.getResource("/").getPath();
@@ -31,7 +35,7 @@ public class ConfigurationUtil {
             configMap.putIfAbsent(configFile, config);
             return config;
         } catch (ConfigurationException e) {
-            e.printStackTrace();
+            LOG.error("Error in `ConfigurationUtil`: {}", e);
             return null;
         }
     }
@@ -46,7 +50,7 @@ public class ConfigurationUtil {
             configMap.putIfAbsent(configFile, config);
             return config;
         } catch (ConfigurationException e) {
-            e.printStackTrace();
+            LOG.error("Error in `ConfigurationUtil`: {}", e);
             return null;
         }
     }

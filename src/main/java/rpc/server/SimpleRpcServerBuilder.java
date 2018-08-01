@@ -9,17 +9,14 @@ import io.netty.handler.logging.LoggingHandler;
 import org.apache.commons.configuration2.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rpc.inject.BeanHouse;
 import rpc.srsd.ServiceRegistrationInfo;
 import rpc.srsd.ServiceRegistry;
 import rpc.util.ConfigurationUtil;
-import rpc.util.Constant;
-import rpc.util.ReflectionUtil;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import static rpc.util.Constant.*;
 
 
 /**
@@ -65,53 +62,37 @@ public class SimpleRpcServerBuilder {
 
         @Override
         public void start() throws Exception {
+            Configuration config = ConfigurationUtil.getPropConfig(RPC_SERVER_CONFIG);
+            BeanHouse beanHouse = BeanHouse.create(beansPackName);
+            Map<String, Object> beans = beanHouse.getServiceBeans();
+
+            beans.keySet().forEach(serviceName -> {
+                String address = config.getString(RPC_SERVER_ADDRESS);
+                String port = config.getString(RPC_SERVER_PORT);
+                Objects.requireNonNull(address);
+                Objects.requireNonNull(port);
+                // id is something like `testService-192-168-115-22`
+                String id = serviceName + "-" + address.replaceAll("\\.", "-");
+
+                ServiceRegistrationInfo regInfo = new ServiceRegistrationInfo();
+                regInfo.setName(serviceName);
+                regInfo.setAddress(address);
+                regInfo.setPort(Integer.parseInt(port));
+                regInfo.setId(id);
+
+                LOG.info("Registration: {}", regInfo);
+
+                registry.register(regInfo);
+            });
+
             EventLoopGroup bossGroup = new NioEventLoopGroup(1);
             EventLoopGroup workerGroup = new NioEventLoopGroup();
-
-            Map<String, Object> beans = new HashMap<>();
-            ReflectionUtil.getClzFromPack(beansPackName).stream()
-                .filter(clz -> clz.getDeclaredAnnotation(LowRpcService.class) != null)
-                .forEach(clz -> {
-                    Object bean;
-                    LowRpcService service = clz.getDeclaredAnnotation(LowRpcService.class);
-                    try {
-                        Constructor c = clz.getDeclaredConstructor();
-                        bean = c.newInstance();
-                        beans.put(service.name(), bean);
-                    } catch (NoSuchMethodException |
-                            IllegalAccessException |
-                            InvocationTargetException |
-                            InstantiationException e) {
-                        e.printStackTrace();
-                        return;
-                    }
-
-                    Configuration config = ConfigurationUtil.getPropConfig(Constant.RPC_SERVER_CONFIG);
-                    String address = config.getString(Constant.RPC_SERVER_ADDRESS);
-                    String port = config.getString(Constant.RPC_SERVER_PORT);
-                    Objects.requireNonNull(address);
-                    Objects.requireNonNull(port);
-                    // id is something like `testService-192-168-115-22`
-                    String id = service.name() + "-" + address.replaceAll("\\.", "-");
-
-                    ServiceRegistrationInfo regInfo = new ServiceRegistrationInfo();
-                    regInfo.setName(service.name());
-                    regInfo.setAddress(address);
-                    regInfo.setPort(Integer.parseInt(port));
-                    regInfo.setId(id);
-
-                    LOG.info("Registration: {}", regInfo);
-
-                    registry.register(regInfo);
-                });
-
             try {
                 ServerBootstrap b = new ServerBootstrap();
                 b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new RpcServerInitializer(beans));
-
                 b.bind(port).sync().channel().closeFuture().sync();
             } finally {
                 bossGroup.shutdownGracefully();

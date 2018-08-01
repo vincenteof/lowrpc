@@ -29,6 +29,7 @@ public class BeanHouse {
     private MutableGraph<String> dependencyGraph = GraphBuilder.directed().build();
     private Map<String, Object> beans = new HashMap<>();
     private Map<String, DependencyEntry> dependencyEntries = new HashMap<>();
+    private Object confObject;
 
     private BeanHouse() {}
 
@@ -60,7 +61,6 @@ public class BeanHouse {
                 }
             });
 
-
         dependenciesAfterTopologicalSort().forEach(name -> {
             DependencyEntry entry = dependencyEntries.get(name);
             if (entry == null) {
@@ -82,7 +82,7 @@ public class BeanHouse {
                 try {
                     method.setAccessible(true);
                     // something may have error
-                    Object bean = method.invoke(null, actualParams);
+                    Object bean = method.invoke(confObject, actualParams);
                     beans.put(name, bean);
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     LOG.error("Refection error in `BeanHouse`: ", e);
@@ -113,7 +113,6 @@ public class BeanHouse {
         Queue<String> queue = new LinkedList<>();
         List<String> sortedDependencies = new LinkedList<>();
 
-        // how to combine 2 loops to make it more elegant
         dependencyGraph.nodes().forEach(cur -> {
             if (dependencyGraph.inDegree(cur) == 0) {
                 queue.add(cur);
@@ -177,6 +176,16 @@ public class BeanHouse {
     }
 
     private void doForConf(Class<?> clz) {
+        try {
+            confObject = clz.getDeclaredConstructor().newInstance();
+        } catch (NoSuchMethodException |
+                IllegalAccessException |
+                InstantiationException |
+                InvocationTargetException e) {
+            LOG.error("Refection error in `BeanHouse`: ", e);
+            throw new IllegalStateException("Configuration object cannot be constructed");
+        }
+
         Stream.of(clz.getDeclaredMethods())
             .forEach(method -> {
                 LowBean lowBean = method.getAnnotation(LowBean.class);
@@ -238,6 +247,5 @@ public class BeanHouse {
         }
     }
 
-    public static void main(String[] args) {
-    }
+    public static void main(String[] args) {}
 }

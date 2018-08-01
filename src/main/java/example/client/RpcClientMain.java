@@ -3,6 +3,7 @@ package example.client;
 import rpc.client.RpcClientProxyFactory;
 import rpc.srsd.consul.ConsulServiceDiscovery;
 
+
 /**
  * class $classname
  *

@@ -5,9 +5,10 @@ import com.google.common.net.HostAndPort;
 import com.orbitz.consul.Consul;
 import org.apache.commons.configuration2.Configuration;
 import rpc.util.ConfigurationUtil;
-import rpc.util.Constant;
 
 import java.util.Objects;
+
+import static rpc.util.Constant.*;
 
 
 /**
@@ -24,11 +25,21 @@ public class ConsulObject {
     public static Consul consul() {
         synchronized (ConsulObject.class) {
             if (consul == null) {
-                Configuration config = ConfigurationUtil.getPropConfig(Constant.RPC_CLIENT_CONFIG);
-                String address = config.getString(Constant.SERVICE_DISCOVERY_ADDRESS);
-                String port = config.getString(Constant.SERVICE_DISCOVERY_PORT);
+                String address;
+                String port;
+                Configuration clientConf = ConfigurationUtil.getPropConfig(RPC_CLIENT_CONFIG);
+                if (clientConf != null) {
+                    address = clientConf.getString(SERVICE_DISCOVERY_ADDRESS);
+                    port = clientConf.getString(SERVICE_DISCOVERY_PORT);
+                } else {
+                    Configuration serverConf = ConfigurationUtil.getPropConfig(RPC_CLIENT_CONFIG);
+                    address = serverConf.getString(SERVICE_REGISTRY_ADDRESS);
+                    port = serverConf.getString(SERVICE_REGISTRY_PORT);
+                }
+
                 Objects.requireNonNull(address);
                 Objects.requireNonNull(port);
+
                 consul = Consul.builder().withHostAndPort(HostAndPort.fromString(address + ":" + port)).build();
             }
             return consul;
