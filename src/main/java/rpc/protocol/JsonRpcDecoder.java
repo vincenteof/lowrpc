@@ -14,7 +14,7 @@ import java.util.List;
  * @author Yingpeng.Chen
  * @date 2018/7/25, 13:49
  */
-public class RpcDecoder extends ByteToMessageDecoder {
+public class JsonRpcDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
         if (in.readableBytes() < 5) {

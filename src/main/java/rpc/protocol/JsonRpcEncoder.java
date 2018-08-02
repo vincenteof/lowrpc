@@ -11,10 +11,10 @@ import rpc.util.JsonSerializationUtil;
  * @author Yingpeng.Chen
  * @date 2018/7/25, 13:47
  */
-public class RpcEncoder extends MessageToByteEncoder {
+public class JsonRpcEncoder extends MessageToByteEncoder {
     private Boolean isRequest;
 
-    public RpcEncoder(Boolean isRequest) {
+    public JsonRpcEncoder(Boolean isRequest) {
         this.isRequest = isRequest;
     }
 

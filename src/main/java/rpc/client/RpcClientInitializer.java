@@ -3,8 +3,8 @@ package rpc.client;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import rpc.protocol.RpcDecoder;
-import rpc.protocol.RpcEncoder;
+import rpc.protocol.JsonRpcDecoder;
+import rpc.protocol.JsonRpcEncoder;
 
 /**
  * class $classname
@@ -17,8 +17,8 @@ public class RpcClientInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel ch) {
         ChannelPipeline pipeline = ch.pipeline();
 
-        pipeline.addLast(new RpcDecoder());
-        pipeline.addLast(new RpcEncoder(true));
+        pipeline.addLast(new JsonRpcDecoder());
+        pipeline.addLast(new JsonRpcEncoder(true));
         pipeline.addLast(new RpcClientHandler());
     }
 }
