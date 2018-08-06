@@ -1,7 +1,8 @@
 package example.server;
 
 import rpc.server.RpcServer;
-import rpc.server.SimpleRpcServerBuilder;
+import rpc.server.SimpleRpcServer;
+import rpc.srsd.ServiceRegistry;
 import rpc.srsd.consul.ConsulServiceRegistry;
 
 /**
@@ -12,9 +13,11 @@ import rpc.srsd.consul.ConsulServiceRegistry;
  */
 public class RpcServerMain {
     public static void main(String[] args) throws Exception {
-        RpcServer server = SimpleRpcServerBuilder.builder(ConsulServiceRegistry.getInstance())
+        String beanPackName = "example.server.service";
+        ServiceRegistry registry = ConsulServiceRegistry.getInstance();
+
+        RpcServer server = SimpleRpcServer.builder(beanPackName, registry)
             .port(8322)
-            .beansPackName("example.server.service")
             .build();
 
         server.start();

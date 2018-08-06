@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import rpc.inject.testservice.ServiceA;
 import rpc.inject.testservice.ServiceB;
+import rpc.util.ReflectionUtil;
 
 import java.util.Map;
 
@@ -19,7 +20,8 @@ public class BeanHouseTest {
 
     @BeforeEach
     void init() {
-        beanHouse = BeanHouse.create("rpc.inject.testservice");
+        beanHouse = BeanHouse.create("rpc.inject.testservice",
+            ReflectionUtil.getRootClzPath(this.getClass()));
     }
 
     @Test

@@ -30,11 +30,19 @@ public class BeanHouse {
     private Map<String, Object> beans = new HashMap<>();
     private Map<String, DependencyEntry> dependencyEntries = new HashMap<>();
     private Object confObject;
+    private String rootClzPath;
 
     private BeanHouse() {}
 
     public static BeanHouse create(String packName) {
         BeanHouse result = new BeanHouse();
+        result.readClzThenConstruct(packName);
+        return result;
+    }
+
+    public static BeanHouse create(String packName, String rootClzPath) {
+        BeanHouse result = new BeanHouse();
+        result.rootClzPath = rootClzPath;
         result.readClzThenConstruct(packName);
         return result;
     }
@@ -49,7 +57,11 @@ public class BeanHouse {
     }
 
     private void readClzThenConstruct(String packName) {
-        ReflectionUtil.getClzFromPack(packName).stream()
+        List<Class<?>> allClz = rootClzPath == null
+            ? ReflectionUtil.getClzFromPack(packName)
+            : ReflectionUtil.getClzFromPack(packName, rootClzPath);
+
+        allClz.stream()
             .filter(clz -> clz.getDeclaredAnnotation(LowRpcService.class) != null ||
                 clz.getDeclaredAnnotation(LowRpcInjectConf.class) != null
             )
@@ -81,7 +93,6 @@ public class BeanHouse {
 
                 try {
                     method.setAccessible(true);
-                    // something may have error
                     Object bean = method.invoke(confObject, actualParams);
                     beans.put(name, bean);
                 } catch (IllegalAccessException | InvocationTargetException e) {

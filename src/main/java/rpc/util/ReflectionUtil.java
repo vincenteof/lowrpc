@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.DirectoryStream;
@@ -25,9 +26,35 @@ import static rpc.util.Constant.*;
 public class ReflectionUtil {
     private static Logger LOG = LoggerFactory.getLogger(ReflectionUtil.class);
 
+    public static String getRootClzPath(Class<?> clz) {
+        String  clzPath =  clz.getResource(EMPTY).getPath();
+        String symbol = TARGET_CLASSES_SYMBOL;
+        int pos = clzPath.indexOf(symbol);
+        if (pos < 0) {
+            symbol = TARGET_TEST_CLASSES_SYMBOL;
+            pos = clzPath.indexOf(symbol);
+            if (pos < 0) {
+                return null;
+            }
+        }
+
+        return clzPath.substring(0, pos + symbol.length());
+    }
+
+    public static List<Class<?>> getClzFromPack(String packageName, String rootClzPath) {
+        String pathStr = rootClzPath + packageName.replace(DOT, SLASH);
+        Path path = new File(pathStr).toPath();
+
+        if (!Files.isDirectory(path)) {
+            throw new IllegalArgumentException("Package `" + packageName + "` does not exist in classpath");
+        }
+
+        return getClzIteration(path, ImmutableList.of(), packageName);
+    }
+
     public static List<Class<?>> getClzFromPack(String packageName) {
-        String uriStr = ClassLoader.getSystemResource(EMPTY).toString() + packageName.replace(DOT, SLASH);
-        Path path = Paths.get(URI.create(uriStr));
+        String pathStr = ReflectionUtil.class.getResource(SLASH).getPath() + packageName.replace(DOT, SLASH);
+        Path path = new File(pathStr).toPath();
 
        if (!Files.isDirectory(path)) {
            throw new IllegalArgumentException("Package `" + packageName + "` does not exist in classpath");

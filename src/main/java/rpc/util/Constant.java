@@ -13,8 +13,10 @@ public class Constant {
     public static final String SERVICE_REGISTRY_PORT            = "service.registry.port";
 
 
-    public static final String DOT = ".";
-    public static final String SLASH = "/";
-    public static final String EMPTY = "";
-    public static final String CLASS_SUFFIX = ".class";
+    public static final String DOT                              = ".";
+    public static final String SLASH                            = "/";
+    public static final String EMPTY                            = "";
+    public static final String CLASS_SUFFIX                     = ".class";
+    public static final String TARGET_CLASSES_SYMBOL            = "/target/classes/";
+    public static final String TARGET_TEST_CLASSES_SYMBOL       = "/target/test-classes/";
 }
