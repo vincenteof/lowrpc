@@ -26,9 +26,11 @@ public class TestService {
 
 public class RpcServerMain {
     public static void main(String[] args) throws Exception {
-        RpcServer server = SimpleRpcServerBuilder.builder(ConsulServiceRegistry.getInstance())
+        String beanPackName = "example.server.service";
+        ServiceRegistry registry = ConsulServiceRegistry.getInstance();
+
+        RpcServer server = SimpleRpcServer.builder(beanPackName, registry)
             .port(8322)
-            .beansPackName("example.server.service")
             .build();
 
         server.start();
@@ -67,7 +69,7 @@ public class RpcClientMain {
 
 - [x] Support for service registry and service discovery.
 - [ ] Support for both async and sync calls.
-- [ ] Handle services which have other dependencies. 
+- [x] Handle services which have other dependencies. 
 - [ ] More sophisticated error handling.
 - [ ] Improve the performance.
 - [ ] Add test cases.
@@ -75,9 +77,11 @@ public class RpcClientMain {
 
 ### Progress
 
-1. Support for Consul service registry and discovery has been added. 
+##### 2018/8/1
+Support for Consul service registry and discovery has been added. 
 
-
+##### 2018/8/3
+A simple dependency injection implementation has been added.
 
 
 
