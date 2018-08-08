@@ -8,6 +8,7 @@ import rpc.srsd.ServiceRegistrationInfo;
 import rpc.srsd.ServiceRegistry;
 import rpc.util.ConfigurationUtil;
 import rpc.util.Constant;
+import rpc.util.NetworkUtil;
 
 import java.util.Objects;
 
@@ -36,7 +37,7 @@ public class ConsulServiceRegistry implements ServiceRegistry {
         AgentClient agentClient = ConsulObject.consul().agentClient();
 
         Configuration conf = ConfigurationUtil.getPropConfig(Constant.RPC_SERVER_CONFIG);
-        String address = conf.getString(Constant.RPC_SERVER_ADDRESS);
+        String address = NetworkUtil.getLocalIp();
         Objects.requireNonNull(address);
         String addressWithPort = String.format("%s:22", address);
 

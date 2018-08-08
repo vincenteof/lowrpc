@@ -24,6 +24,9 @@ import java.util.List;
 /**
  * class $classname
  *
+ * The factory class for creating rpc client proxy.
+ * The methods in the proxy actually query remote servers.
+ *
  * @author Yingpeng.Chen
  * @date 2018/7/26, 15:00
  */
@@ -64,6 +67,7 @@ public class RpcClientProxyFactory {
             request.setParamTypes(paramTypes.length == 0 ? null : paramTypes);
             request.setParams(args);
 
+            // get all available from consul or zookeeper
             List<ServiceRegistrationInfo> regList =  discovery.getAvailableServices(serviceName);
             ServiceRegistrationInfo reg = regList.get(MathUtil.randomIntInRange(0, regList.size()));
             LOG.info("Select service registration is: {}", reg);
@@ -84,6 +88,7 @@ public class RpcClientProxyFactory {
 
                 LOG.info("Request received in dynamic proxy: {}", request);
 
+                // use the requestId to retrieve rpc result
                 Integer requestId = request.getRequestId();
                 RpcResponse response;
 

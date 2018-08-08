@@ -22,7 +22,6 @@ import static rpc.util.Constant.*;
  * @date 2018/7/26, 9:25
  */
 
-// refactor it to fix bug in junit test
 public class ReflectionUtil {
     private static Logger LOG = LoggerFactory.getLogger(ReflectionUtil.class);
 

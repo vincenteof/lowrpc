@@ -13,6 +13,7 @@ import rpc.inject.BeanHouse;
 import rpc.srsd.ServiceRegistrationInfo;
 import rpc.srsd.ServiceRegistry;
 import rpc.util.ConfigurationUtil;
+import rpc.util.NetworkUtil;
 
 import java.util.Map;
 import java.util.Objects;
@@ -65,7 +66,7 @@ public class SimpleRpcServer extends RpcServer {
 
         beans.keySet().forEach(serviceName -> {
             // do not use the configuration for address
-            String address = config.getString(RPC_SERVER_ADDRESS);
+            String address = NetworkUtil.getLocalIp();
             String port = config.getString(RPC_SERVER_PORT);
             Objects.requireNonNull(address);
             Objects.requireNonNull(port);

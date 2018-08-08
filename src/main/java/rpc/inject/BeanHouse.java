@@ -19,6 +19,8 @@ import java.util.stream.Stream;
 /**
  * class $classname
  *
+ * A container for all beans.
+ *
  * @author Yingpeng.Chen
  * @date 2018/7/31, 10:40
  */
@@ -56,11 +58,17 @@ public class BeanHouse {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    /**
+     * Read all class in some package and construct all instances of these classes.
+     *
+     * @param packName package name of the classes
+     */
     private void readClzThenConstruct(String packName) {
         List<Class<?>> allClz = rootClzPath == null
             ? ReflectionUtil.getClzFromPack(packName)
             : ReflectionUtil.getClzFromPack(packName, rootClzPath);
 
+        // construct the dependency graph
         allClz.stream()
             .filter(clz -> clz.getDeclaredAnnotation(LowRpcService.class) != null ||
                 clz.getDeclaredAnnotation(LowRpcInjectConf.class) != null
@@ -73,6 +81,7 @@ public class BeanHouse {
                 }
             });
 
+        // construct instances based on the dependency graph
         dependenciesAfterTopologicalSort().forEach(name -> {
             DependencyEntry entry = dependencyEntries.get(name);
             if (entry == null) {
@@ -120,6 +129,12 @@ public class BeanHouse {
 
     }
 
+    /**
+     * A simple implementation of topological sort.
+     * After sorting these dependencies, we can construct each one of it.
+     *
+     * @return A list of all services's names that conform to topological order
+     */
     private List<String> dependenciesAfterTopologicalSort() {
         Queue<String> queue = new LinkedList<>();
         List<String> sortedDependencies = new LinkedList<>();
@@ -148,6 +163,13 @@ public class BeanHouse {
         return sortedDependencies;
     }
 
+    /**
+     * The constructor has the form: C(@LowBean(name = "comp") Component component)
+     * This method will find all needed beans for the constructor based on the annotation.
+     *
+     * @param paramAnnotations annotations on the every constructor parameter
+     * @return
+     */
     private Object[] makeActualParams(Annotation[][] paramAnnotations) {
         List<Object> actualParams = new LinkedList<>();
 
@@ -166,6 +188,11 @@ public class BeanHouse {
         return actualParams.toArray();
     }
 
+    /**
+     * Construct the dependency graph for service definition.
+     *
+     * @param clz the class which defines the service
+     */
     private void doForService(Class<?> clz) {
         Constructor<?>[] constructors = clz.getDeclaredConstructors();
         if (constructors.length == 0) {
@@ -186,6 +213,11 @@ public class BeanHouse {
         this.searchDependencyThenAdd(beanName, paramTypes, paramAnnotations);
     }
 
+    /**
+     * Construct the dependency graph for the configuration class which contains bean definitions.
+     *
+     * @param clz
+     */
     private void doForConf(Class<?> clz) {
         try {
             confObject = clz.getDeclaredConstructor().newInstance();
@@ -230,6 +262,9 @@ public class BeanHouse {
         }
     }
 
+    /**
+     * This class represents dependency.
+     */
     private class DependencyEntry {
         DependencyEntry(String name, Executable executable, Boolean method) {
             this.name = name;
@@ -257,6 +292,4 @@ public class BeanHouse {
             return method;
         }
     }
-
-    public static void main(String[] args) {}
 }

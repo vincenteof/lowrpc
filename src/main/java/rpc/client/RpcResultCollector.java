@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * class $classname
  *
+ * Container class for netty to pass the result out.
+ *
  * @author Yingpeng.Chen
  * @date 2018/7/26, 16:01
  */

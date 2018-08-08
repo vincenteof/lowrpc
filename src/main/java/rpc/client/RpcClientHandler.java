@@ -9,6 +9,8 @@ import rpc.protocol.RpcResponse;
 /**
  * class $classname
  *
+ * Handler for receiving response from rpc server.
+ *
  * @author Yingpeng.Chen
  * @date 2018/7/25, 15:26
  */

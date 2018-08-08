@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 /**
  * class $classname
  *
+ * Annotation for labeling beans.
+ *
  * @author Yingpeng.Chen
  * @date 2018/7/31, 11:23
  */

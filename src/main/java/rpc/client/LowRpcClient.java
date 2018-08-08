@@ -8,13 +8,14 @@ import java.lang.annotation.Target;
 /**
  * class $classname
  *
+ * Annotation for rpc client interface definition.
+ * `serviceName` stands for the service registered in Consul or Zookeeper.
+ *
  * @author Yingpeng.Chen
  * @date 2018/7/26, 14:45
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LowRpcClient {
-//    String host() default "";
-//    int port() default 0;
     String serviceName();
 }
