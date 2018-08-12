@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 public class NetworkUtil {
     private static Logger LOG = LoggerFactory.getLogger(NetworkUtil.class);
 
+
     public static String getLocalIp() {
         try(final DatagramSocket socket = new DatagramSocket()){
             socket.connect(InetAddress.getByName("8.8.8.8"), 10002);

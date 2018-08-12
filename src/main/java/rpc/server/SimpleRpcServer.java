@@ -20,6 +20,9 @@ import java.util.Objects;
 
 import static rpc.util.Constant.*;
 
+/**
+ * A simple implementation of the abstract `RpcServer`, which is very inefficient.
+ */
 public class SimpleRpcServer extends RpcServer {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleRpcServer.class);
 

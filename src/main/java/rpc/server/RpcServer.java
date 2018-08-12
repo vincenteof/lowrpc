@@ -3,6 +3,8 @@ package rpc.server;
 /**
  * class $classname
  *
+ * Abstract class of rpc server.
+ *
  * @author Yingpeng.Chen
  * @date 2018/7/26, 13:41
  */

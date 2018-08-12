@@ -25,6 +25,12 @@ import static rpc.util.Constant.*;
 public class ReflectionUtil {
     private static Logger LOG = LoggerFactory.getLogger(ReflectionUtil.class);
 
+    /**
+     * Get the root class path of the project.
+     *
+     * @param clz any class you written in this project
+     * @return
+     */
     public static String getRootClzPath(Class<?> clz) {
         String  clzPath =  clz.getResource(EMPTY).getPath();
         String symbol = TARGET_CLASSES_SYMBOL;
@@ -40,6 +46,14 @@ public class ReflectionUtil {
         return clzPath.substring(0, pos + symbol.length());
     }
 
+    /**
+     * It seems that we can not get the correct root class path of current project when in a junit test.
+     * So the `rootClzPath` is needed.
+     *
+     * @param packageName
+     * @param rootClzPath
+     * @return
+     */
     public static List<Class<?>> getClzFromPack(String packageName, String rootClzPath) {
         String pathStr = rootClzPath + packageName.replace(DOT, SLASH);
         Path path = new File(pathStr).toPath();
@@ -51,6 +65,11 @@ public class ReflectionUtil {
         return getClzIteration(path, ImmutableList.of(), packageName);
     }
 
+    /**
+     * Get all `Class` object in certain package in this project.
+     * @param packageName the package name
+     * @return
+     */
     public static List<Class<?>> getClzFromPack(String packageName) {
         String pathStr = ReflectionUtil.class.getResource(SLASH).getPath() + packageName.replace(DOT, SLASH);
         Path path = new File(pathStr).toPath();
@@ -62,6 +81,14 @@ public class ReflectionUtil {
        return getClzIteration(path, ImmutableList.of(), packageName);
     }
 
+    /**
+     * Helper function for iteration of reading all classes.
+     * 
+     * @param cur
+     * @param acc
+     * @param packName
+     * @return
+     */
     private static ImmutableList<Class<?>> getClzIteration(Path cur, ImmutableList<Class<?>> acc, String packName) {
         if (Files.isRegularFile(cur)) {
             String fileName = cur.getFileName().toString();

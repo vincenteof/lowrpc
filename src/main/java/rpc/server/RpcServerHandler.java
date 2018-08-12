@@ -14,6 +14,8 @@ import java.util.Objects;
 /**
  * class $classname
  *
+ * Handling of incoming rpc requests
+ *
  * @author Yingpeng.Chen
  * @date 2018/7/25, 13:56
  */
@@ -46,6 +48,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
             throw new IllegalArgumentException("Parameters is not compatible with parameter types");
         }
 
+        // get the result from the requested service beans, which is constructed when the server starts
         Object bean = beans.get(serviceName);
         if (Objects.isNull(bean)) {
             throw new IllegalArgumentException("Service `" + serviceName + "` does not exists");
@@ -93,6 +96,12 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
         return params.length == paramTypes.length;
     }
 
+    /**
+     * Check whether the incoming rpc request is valid.
+     * @param params the passing parameters for this request
+     * @param paramTypes the type of the parameters
+     * @return
+     */
     private boolean isParamsCompatible(Object[] params, Class<?>[] paramTypes) {
         if (params == null && paramTypes == null) {
             return true;

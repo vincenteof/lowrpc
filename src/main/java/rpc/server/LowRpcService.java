@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 /**
  * class $classname
  *
+ * Annotation for exposed service.
+ *
  * @author Yingpeng.Chen
  * @date 2018/7/27, 16:16
  */

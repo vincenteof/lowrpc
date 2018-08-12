@@ -39,6 +39,7 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
         List<ServiceHealth> serviceHealths = healthClient.getAllServiceInstances(name).getResponse();
         LOG.info("All healthy service for name `{}`: {}", name, serviceHealths);
 
+        // get all health services from consul server
         return serviceHealths.stream()
             .map(sh -> {
                 Service service = sh.getService();
