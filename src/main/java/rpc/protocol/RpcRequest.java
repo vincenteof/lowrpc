@@ -9,7 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Yingpeng.Chen
  * @date 2018/7/25, 11:05
  */
-
+// Is it able to remove the setter of `requestId`
+// Find a better way to create requestId
 public class RpcRequest {
     private static AtomicInteger counter = new AtomicInteger(0);
 
