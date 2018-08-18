@@ -67,7 +67,7 @@ public class RpcClientProxyFactory {
             request.setParamTypes(paramTypes.length == 0 ? null : paramTypes);
             request.setParams(args);
 
-            // get all available from consul or zookeeper
+            // get all available services from consul or zookeeper
             List<ServiceRegistrationInfo> regList =  discovery.getAvailableServices(serviceName);
             ServiceRegistrationInfo reg = regList.get(MathUtil.randomIntInRange(0, regList.size()));
             LOG.info("Select service registration is: {}", reg);

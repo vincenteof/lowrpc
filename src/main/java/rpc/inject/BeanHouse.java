@@ -24,7 +24,7 @@ import java.util.stream.Stream;
  * @author Yingpeng.Chen
  * @date 2018/7/31, 10:40
  */
-// how to make it a global instance and thread-safe ???
+// prob: how to make it a global instance and thread-safe ???
 public class BeanHouse {
     private static Logger LOG = LoggerFactory.getLogger(BeanHouse.class);
 

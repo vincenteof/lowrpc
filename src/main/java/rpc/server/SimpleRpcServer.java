@@ -68,7 +68,6 @@ public class SimpleRpcServer extends RpcServer {
         Map<String, Object> beans = beanHouse.getServiceBeans();
 
         beans.keySet().forEach(serviceName -> {
-            // do not use the configuration for address
             String address = NetworkUtil.getLocalIp();
             String port = config.getString(RPC_SERVER_PORT);
             Objects.requireNonNull(address);

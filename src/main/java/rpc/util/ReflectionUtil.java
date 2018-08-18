@@ -83,7 +83,7 @@ public class ReflectionUtil {
 
     /**
      * Helper function for iteration of reading all classes.
-     * 
+     *
      * @param cur
      * @param acc
      * @param packName
