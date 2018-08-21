@@ -42,5 +42,4 @@ public class RpcResultCollector {
         }
         results.put(requestId, response);
     }
-
 }

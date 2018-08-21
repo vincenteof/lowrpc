@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rpc.srsd.ServiceDiscovery;
 import rpc.srsd.ServiceRegistrationInfo;
+import rpc.util.MathUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,6 +53,13 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
             })
             .collect(Collectors.toList());
     }
+
+    @Override
+    public ServiceRegistrationInfo getRandomAvailableService(String name) {
+        List<ServiceRegistrationInfo> regList =  this.getAvailableServices(name);
+        return regList.get(MathUtil.randomIntInRange(0, regList.size()));
+    }
+
 
     public static void main(String[] args) {
         List<ServiceRegistrationInfo> lst = ConsulServiceDiscovery.getInstance().getAvailableServices("test");

@@ -10,4 +10,5 @@ import java.util.List;
  */
 public interface ServiceDiscovery {
     List<ServiceRegistrationInfo> getAvailableServices(String name);
+    ServiceRegistrationInfo getRandomAvailableService(String name);
 }

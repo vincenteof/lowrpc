@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * class $classname
@@ -67,9 +68,16 @@ public class RpcClientProxyFactory {
             request.setParamTypes(paramTypes.length == 0 ? null : paramTypes);
             request.setParams(args);
 
-            // get all available services from consul or zookeeper
-            List<ServiceRegistrationInfo> regList =  discovery.getAvailableServices(serviceName);
-            ServiceRegistrationInfo reg = regList.get(MathUtil.randomIntInRange(0, regList.size()));
+            if (method.getReturnType().equals(LowFuture.class)) {
+                return asyncInvoke(request);
+            }
+
+            return syncInvoke(request);
+        }
+
+        Object syncInvoke(RpcRequest request) throws Throwable {
+            // get random available services from consul or zookeeper
+            ServiceRegistrationInfo reg = discovery.getRandomAvailableService(serviceName);
             LOG.info("Select service registration is: {}", reg);
 
             Configuration conf = ConfigurationUtil.getPropConfig(Constant.RPC_CLIENT_CONFIG);
@@ -111,6 +119,10 @@ public class RpcClientProxyFactory {
             } finally {
                 group.shutdownGracefully();
             }
+        }
+
+        LowFuture<?> asyncInvoke(RpcRequest request) {
+            return LowFuture.create(request);
         }
     }
 }
