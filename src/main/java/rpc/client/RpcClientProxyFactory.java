@@ -69,7 +69,7 @@ public class RpcClientProxyFactory {
             request.setParams(args);
 
             if (method.getReturnType().equals(LowFuture.class)) {
-                return asyncInvoke(request);
+                return asyncInvoke(request, method);
             }
 
             return syncInvoke(request);
@@ -121,7 +121,7 @@ public class RpcClientProxyFactory {
             }
         }
 
-        LowFuture<?> asyncInvoke(RpcRequest request) {
+        LowFuture<?> asyncInvoke(RpcRequest request, Method method) {
             return LowFuture.create(request);
         }
     }

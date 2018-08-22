@@ -30,36 +30,65 @@ public class LowFuture<V> implements Future<V> {
         return future;
     }
 
-    public static <T> LowFuture<T> createWithCallback(RpcRequest request, LowCallback<T> cb) {
+//    public static <T> LowFuture<T> createWithCallback(RpcRequest request, LowCallback<T> cb) {
+//        LowFuture<T> future = new LowFuture<>();
+//        future.request = request;
+//        future.cb = cb;
+//        future.current = es.submit(future.new LowComputation());
+//        return future;
+//    }
+
+    public static <T> LowFuture<T> lazyCreate(RpcRequest request) {
         LowFuture<T> future = new LowFuture<>();
         future.request = request;
-        future.cb = cb;
-        future.current = es.submit(future.new LowComputation());;
         return future;
+    }
+
+    public void withCallback(LowCallback<V> cb) {
+        this.cb = cb;
+    }
+
+    public boolean startCompute() {
+        if (current == null) {
+            current = es.submit(new LowComputation());
+            return true;
+        }
+        return false;
+    }
+
+    private void assertStarted() {
+        if (current == null) {
+            throw new IllegalStateException("This `Future` has not started");
+        }
     }
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
+        assertStarted();
         return current.cancel(mayInterruptIfRunning);
     }
 
     @Override
     public boolean isCancelled() {
+        assertStarted();
         return current.isCancelled();
     }
 
     @Override
     public boolean isDone() {
+        assertStarted();
         return current.isDone();
     }
 
     @Override
     public V get() throws InterruptedException, ExecutionException {
+        assertStarted();
         return current.get();
     }
 
     @Override
     public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        assertStarted();
         return current.get(timeout, unit);
     }
 
@@ -76,7 +105,9 @@ public class LowFuture<V> implements Future<V> {
 
             @SuppressWarnings("unchecked")
             V result = (V) response.getValue();
-            cb.callback(result);
+            if (cb != null) {
+                cb.callback(result);
+            }
 
             return result;
         }
