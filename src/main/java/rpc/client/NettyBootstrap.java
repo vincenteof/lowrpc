@@ -17,7 +17,16 @@ public class NettyBootstrap {
     private NettyBootstrap() {}
 
     private static Bootstrap nioInstance;
+    private static EventLoopGroup nioEventLoopGroup;
     private static Bootstrap oioInstance;
+    private static EventLoopGroup oioEventLoopGroup;
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            nioEventLoopGroup.shutdownGracefully();
+            oioEventLoopGroup.shutdownGracefully();
+        }));
+    }
 
     public static Bootstrap nioBootstrap() {
         synchronized (NettyBootstrap.class) {
@@ -27,6 +36,7 @@ public class NettyBootstrap {
                 b.group(group)
                     .channel(NioSocketChannel.class)
                     .handler(new RpcClientInitializer());
+                nioEventLoopGroup = group;
                 nioInstance = b;
             }
         }
@@ -42,6 +52,7 @@ public class NettyBootstrap {
                 b.group(group)
                     .channel(OioSocketChannel.class)
                     .handler(new RpcClientInitializer());
+                oioEventLoopGroup = group;
                 oioInstance = b;
             }
         }

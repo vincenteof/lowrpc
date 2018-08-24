@@ -15,7 +15,11 @@ import java.util.concurrent.*;
  */
 public class LowFuture<V> implements Future<V> {
     private static Logger LOG = LoggerFactory.getLogger(LowFuture.class);
-    private static ExecutorService es = Executors.newCachedThreadPool();
+    private static ExecutorService es = Executors.newCachedThreadPool(r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    });
 
     private Future<V> current;
     private RpcRequest request;
