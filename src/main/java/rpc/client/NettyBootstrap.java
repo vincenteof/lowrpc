@@ -3,7 +3,9 @@ package rpc.client;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.channel.socket.oio.OioSocketChannel;
 
 /**
  * class $classname
@@ -33,6 +35,16 @@ public class NettyBootstrap {
     }
 
     public static Bootstrap oioBootstrap() {
+        synchronized (NettyBootstrap.class) {
+            if (oioInstance == null) {
+                EventLoopGroup group = new OioEventLoopGroup();
+                Bootstrap b = new Bootstrap();
+                b.group(group)
+                    .channel(OioSocketChannel.class)
+                    .handler(new RpcClientInitializer());
+                oioInstance = b;
+            }
+        }
         return oioInstance;
     }
 }

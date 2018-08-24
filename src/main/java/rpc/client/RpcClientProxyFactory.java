@@ -75,54 +75,30 @@ public class RpcClientProxyFactory {
             return syncInvoke(request);
         }
 
-        Object syncInvoke(RpcRequest request) throws Throwable {
+        private Object syncInvoke(RpcRequest request) throws Throwable {
             // get random available services from consul or zookeeper
             ServiceRegistrationInfo reg = discovery.getRandomAvailableService(serviceName);
             LOG.info("Select service registration is: {}", reg);
 
-            Configuration conf = ConfigurationUtil.getPropConfig(Constant.RPC_CLIENT_CONFIG);
-            long timeOut = conf.getLong(Constant.RPC_CLIENT_TIMEOUT);
-
-            EventLoopGroup group = new NioEventLoopGroup();
             RpcResultCollector collector = RpcResultCollector.getInstance();
-            long timeAcc = 0;
-            try {
-                Bootstrap b = new Bootstrap();
-                b.group(group)
-                    .channel(NioSocketChannel.class)
-                    .handler(new RpcClientInitializer());
-                Channel channel = b.connect(reg.getAddress(), reg.getPort()).sync().channel();
-                channel.writeAndFlush(request).sync();
+            Bootstrap bootstrap = NettyBootstrap.oioBootstrap();
+            NettyChannelCache channelCache = NettyChannelCache.getInstance();
 
-                LOG.info("Request sent in dynamic proxy: {}", request);
+            Channel channel = channelCache.getChannel(reg.getAddress(), reg.getPort(), bootstrap);
+            channel.writeAndFlush(request).sync();
 
-                // use the requestId to retrieve rpc result
-                Integer requestId = request.getRequestId();
-                RpcResponse response;
-
-                while ((response = collector.getIfPresent(requestId)) == null && timeAcc < timeOut) {
-                    Thread.sleep(100);
-                    LOG.info("Wait for response for 100ms");
-                    timeAcc += 100;
-                }
-                channel.closeFuture().sync();
-
-                if (response == null) {
-                    throw new RuntimeException("Client timeout");
-                }
-
-                if (response.getStatus() == 0) {
-                    throw new RuntimeException("Rpc call failed for: " + response.getDescription());
-                }
-
-                return response.getValue();
-            } finally {
-                group.shutdownGracefully();
+            RpcResponse response = collector.getIfPresent(request.getRequestId());
+            if (response == null) {
+                throw new IllegalStateException("There should be the response");
             }
+            return response.getValue();
         }
 
-        LowFuture<?> asyncInvoke(RpcRequest request, Method method) throws Throwable {
+        // prob: may need some re-connect strategy because the connection return by cache may be no longer valid ???
+        private LowFuture<?> asyncInvoke(RpcRequest request, Method method) throws Throwable {
             ServiceRegistrationInfo reg = discovery.getRandomAvailableService(serviceName);
+            LOG.info("Select service registration is: {}", reg);
+
             Bootstrap bootstrap = NettyBootstrap.nioBootstrap();
             NettyChannelCache channelCache = NettyChannelCache.getInstance();
 
