@@ -94,7 +94,7 @@ public class RpcClientProxyFactory {
                 Channel channel = b.connect(reg.getAddress(), reg.getPort()).sync().channel();
                 channel.writeAndFlush(request).sync();
 
-                LOG.info("Request received in dynamic proxy: {}", request);
+                LOG.info("Request sent in dynamic proxy: {}", request);
 
                 // use the requestId to retrieve rpc result
                 Integer requestId = request.getRequestId();
@@ -121,7 +121,18 @@ public class RpcClientProxyFactory {
             }
         }
 
-        LowFuture<?> asyncInvoke(RpcRequest request, Method method) {
+        LowFuture<?> asyncInvoke(RpcRequest request, Method method) throws Throwable {
+            ServiceRegistrationInfo reg = discovery.getRandomAvailableService(serviceName);
+            Bootstrap bootstrap = NettyBootstrap.nioBootstrap();
+            NettyChannelCache channelCache = NettyChannelCache.getInstance();
+
+            Channel channel = channelCache.getChannel(reg.getAddress(), reg.getPort(), bootstrap);
+            channel.writeAndFlush(request).sync();
+
+            if (method.getDeclaredAnnotation(LazyCreate.class) != null) {
+                return LowFuture.lazyCreate(request);
+            }
+
             return LowFuture.create(request);
         }
     }
