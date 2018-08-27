@@ -75,6 +75,7 @@ public class RpcClientProxyFactory {
             return syncInvoke(request);
         }
 
+        // prob: effective ways to notify this thread when result is available, like `countdownlatch` ???
         private Object syncInvoke(RpcRequest request) throws Throwable {
             // get random available services from consul or zookeeper
             ServiceRegistrationInfo reg = discovery.getRandomAvailableService(serviceName);
@@ -85,12 +86,32 @@ public class RpcClientProxyFactory {
             NettyChannelCache channelCache = NettyChannelCache.getInstance();
 
             Channel channel = channelCache.getChannel(reg.getAddress(), reg.getPort(), bootstrap);
+            LOG.info(
+                "Cached channel status: `isOpen: {}`, `isActive: {}`, `isRegistered: {}`, `isWritable: {}`",
+                channel.isOpen(), channel.isActive(), channel.isRegistered(), channel.isWritable()
+            );
             channel.writeAndFlush(request).sync();
 
-            RpcResponse response = collector.getIfPresent(request.getRequestId());
-            if (response == null) {
-                throw new IllegalStateException("There should be the response");
+            Configuration conf = ConfigurationUtil.getPropConfig(Constant.RPC_CLIENT_CONFIG);
+            long timeOut = conf.getLong(Constant.RPC_CLIENT_TIMEOUT);
+            long timeAcc = 0;
+            Integer requestId = request.getRequestId();
+            RpcResponse response;
+
+            while ((response = collector.getIfPresent(requestId)) == null && timeAcc < timeOut) {
+                Thread.sleep(100);
+                LOG.info("Wait for response for 100ms");
+                timeAcc += 100;
             }
+
+            if (response == null) {
+                throw new RuntimeException("Client timeout");
+            }
+
+            if (response.getStatus() == 0) {
+                throw new RuntimeException("Rpc call failed for: " + response.getDescription());
+            }
+
             return response.getValue();
         }
 

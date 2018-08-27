@@ -1,5 +1,7 @@
 package example.client;
 
+import rpc.client.LazyCreate;
+import rpc.client.LowFuture;
 import rpc.client.LowRpcClient;
 
 /**
@@ -15,4 +17,9 @@ public interface TestServiceClient {
     Integer testStateWithoutParams();
 
     Boolean testStateWithParams(Integer num);
+
+    LowFuture<String> testAsync();
+
+    @LazyCreate
+    LowFuture<String> testCallback();
 }

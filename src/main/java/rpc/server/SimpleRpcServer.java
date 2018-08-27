@@ -1,6 +1,7 @@
 package rpc.server;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -93,6 +94,8 @@ public class SimpleRpcServer extends RpcServer {
             b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
+                .option(ChannelOption.SO_BACKLOG, 128)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childHandler(new RpcServerInitializer(beans));
             b.bind(this.getPort()).sync().channel().closeFuture().sync();
         } finally {

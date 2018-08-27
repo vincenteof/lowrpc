@@ -25,4 +25,8 @@ public class TestService {
     public Boolean testStateWithParams(Integer num) {
         return num == counter.get();
     }
+
+    public String testAsync() { return "Async Ok"; }
+
+    public String testCallback() { return "Callback Ok"; }
 }

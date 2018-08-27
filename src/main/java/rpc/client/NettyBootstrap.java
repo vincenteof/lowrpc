@@ -1,6 +1,7 @@
 package rpc.client;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
@@ -29,12 +30,14 @@ public class NettyBootstrap {
     }
 
     public static Bootstrap nioBootstrap() {
+        // prob: may need some custom heart beat and persistent connection strategy ???
         synchronized (NettyBootstrap.class) {
             if (nioInstance == null) {
                 EventLoopGroup group = new NioEventLoopGroup();
                 Bootstrap b = new Bootstrap();
                 b.group(group)
                     .channel(NioSocketChannel.class)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
                     .handler(new RpcClientInitializer());
                 nioEventLoopGroup = group;
                 nioInstance = b;
@@ -51,6 +54,7 @@ public class NettyBootstrap {
                 Bootstrap b = new Bootstrap();
                 b.group(group)
                     .channel(OioSocketChannel.class)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
                     .handler(new RpcClientInitializer());
                 oioEventLoopGroup = group;
                 oioInstance = b;

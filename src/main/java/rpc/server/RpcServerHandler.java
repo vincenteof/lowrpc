@@ -73,7 +73,8 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
         response.setValue(result);
         response.setRequestId(msg.getRequestId());
 
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+//        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        ctx.writeAndFlush(response);
     }
 
     @Override
@@ -81,7 +82,9 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
         RpcResponse response = new RpcResponse();
         response.setStatus(0);
         response.setDescription(cause.getMessage());
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+
+//        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        ctx.writeAndFlush(response);
     }
 
     private boolean hasSameLength(Object[] params, Class<?>[] paramTypes) {
