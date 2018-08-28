@@ -1,6 +1,7 @@
 package example.client;
 
 import rpc.client.LowFuture;
+import rpc.client.NettyChannelManager;
 import rpc.client.RpcClientProxyFactory;
 import rpc.srsd.consul.ConsulServiceDiscovery;
 
@@ -27,5 +28,7 @@ public class RpcClientMain {
         LowFuture<String> lazyFuture = client.testCallback();
         lazyFuture.withCallback(ret -> System.out.println("The result is: " + ret));
         lazyFuture.startCompute();
+
+        NettyChannelManager.getInstance().shutdown();
     }
 }

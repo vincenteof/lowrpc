@@ -1,8 +1,9 @@
 package rpc.server;
 
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rpc.protocol.RpcRequest;
 import rpc.protocol.RpcResponse;
 
@@ -20,7 +21,8 @@ import java.util.Objects;
  * @date 2018/7/25, 13:56
  */
 public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
-    private Map<String, Object> beans;
+    private static final Logger LOG = LoggerFactory.getLogger(RpcServerHandler.class);
+    private final Map<String, Object> beans;
 
     public RpcServerHandler(Map<String, Object> beans) {
         this.beans = beans;
