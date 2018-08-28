@@ -22,6 +22,10 @@ public class TestService {
     public Boolean testStateWithParams(Integer num) {
         return num == counter.get();
     }
+
+    public String testAsync() { return "Async Ok"; }
+
+    public String testCallback() { return "Callback Ok"; }
 }
 
 public class RpcServerMain {
@@ -47,18 +51,35 @@ public interface TestServiceClient {
     Integer testStateWithoutParams();
 
     Boolean testStateWithParams(Integer num);
+
+    LowFuture<String> testAsync();
+
+    @LazyCreate
+    LowFuture<String> testCallback();
 }
 
 
 public class RpcClientMain {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
         TestServiceClient client = RpcClientProxyFactory.createProxy(
             TestServiceClient.class,
             ConsulServiceDiscovery.getInstance()
         );
+        
+        // sync call
         System.out.println(client.testPureWithoutParams());
         System.out.println(client.testStateWithoutParams());
         System.out.println(client.testStateWithParams(2));
+        
+        // async call
+        LowFuture<String> future = client.testAsync();
+        System.out.println(future.get());
+        LowFuture<String> lazyFuture = client.testCallback();
+        lazyFuture.withCallback(ret -> System.out.println("The result is: " + ret));
+        lazyFuture.startCompute();
+        
+        // release resource
+        NettyChannelManager.getInstance().shutdown();
     }
 }
 ```
@@ -68,7 +89,7 @@ public class RpcClientMain {
 ### Something left for improvement
 
 - [x] Support for service registry and service discovery.
-- [ ] Support for both async and sync calls.
+- [x] Support for both async and sync calls.
 - [x] Handle services which have other dependencies. 
 - [ ] More sophisticated error handling.
 - [ ] Improve the performance.
@@ -82,6 +103,9 @@ Support for Consul service registry and discovery has been added.
 
 ##### 2018/8/3
 A simple dependency injection implementation has been added.
+
+##### 2018/8/28
+Both async call and sync call has been supported.
 
 
 

@@ -29,15 +29,15 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
         ctx.close();
     }
 
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        LOG.info("Inactive event happening");
-        ctx.close();
-    }
-
-    @Override
-    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        LOG.info("Unregistered event happening");
-        ctx.close();
-    }
+//    @Override
+//    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+//        LOG.info("Inactive event happening");
+//        ctx.close();
+//    }
+//
+//    @Override
+//    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+//        LOG.info("Unregistered event happening");
+//        ctx.close();
+//    }
 }

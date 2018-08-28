@@ -10,6 +10,8 @@ import java.util.concurrent.*;
 /**
  * class $classname
  *
+ * Future implementation for rpc async result.
+ *
  * @author Yingpeng.Chen
  * @date 2018/8/21, 11:51
  */
